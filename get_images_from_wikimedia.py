@@ -78,7 +78,8 @@ def search(query: str, *, take=3, save_path="images"):
                 json.dump(attrib, f, indent=4)
         else:
             print(f"No successful scraping for query {query}")
-            shutil.rmtree(save_path)
+            if not any(Path(save_path).iterdir()):
+                shutil.rmtree(save_path)
     else:
         print(f"Query: {query}, returned {response.status}")
 
