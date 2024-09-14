@@ -38,6 +38,7 @@ def full_image(url, file_name, attrib):
             urllib.request.urlretrieve(img, file_name)
         except:
             print(f"Full image url: {url}, retrieval failed")
+            return False
         attrib[len(attrib)+1] = attribution(img)
         return True
     else:
@@ -67,13 +68,14 @@ def search(query: str, *, take=3, save_path="images"):
             extension = src.split(".")[-1]
             if extension in ["jpg", "jpeg", "png"]:
                 taken += 1
-                success = success or full_image(src, dir/f"{taken}.{extension}", attrib)
+                result = full_image(src, dir/f"{taken}.{extension}", attrib)
+                success = success or result
                 if taken == take:
                     break
 
         if success:
-            with open(dir/"attributions", "w") as f:
-                json.dump(attrib, f)
+            with open(dir/"attributions.json", "w") as f:
+                json.dump(attrib, f, indent=4)
         else:
             print(f"No successful scraping for query {query}")
             shutil.rmtree(save_path)
@@ -83,8 +85,8 @@ def search(query: str, *, take=3, save_path="images"):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("query", type=str, help="Query to extract images for")
-    parser.add_argument("-take", type=int, default=1, help="Number of images to extract")
-    parser.add_argument("-path", type=str, default="images", help="Path to save images")
+    parser.add_argument("-take", type=int, default=1, help="Number of images to extract", dest="take")
+    parser.add_argument("-path", type=str, default="images", help="Path to save images", dest="path")
     args = parser.parse_args()
 
-    search(args.query, take = args.take)
+    search(args.query, take=args.take, save_path=args.path)
